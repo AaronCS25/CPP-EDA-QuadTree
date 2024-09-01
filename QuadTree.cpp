@@ -2,7 +2,7 @@
 
 // QuadNode
 void QuadNode::addToBucket(const std::shared_ptr<Particle>& particle) {
-    // TODO: Implement addToBucket function
+    particles.push_back(particle);
 }
 
 bool QuadNode::propagate(const std::shared_ptr<Particle>& particle) {

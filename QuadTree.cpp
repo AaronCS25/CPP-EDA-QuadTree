@@ -11,7 +11,13 @@ bool QuadNode::propagate(const std::shared_ptr<Particle>& particle) {
 }
 
 void QuadNode::subdivide() {
-    // TODO: Implement subdivide function
+    Point2D Pmin = boundary.getPmin();
+    Point2D Pmax = boundary.getPmax();
+    Point2D centerP = boundary.getCenter();
+    children[0] = std::make_unique<QuadNode>(Pmin.getX(), centerP.getY(), centerP.getX(), Pmax.getY(), this); // NW
+    children[1] = std::make_unique<QuadNode>(centerP.getX(), centerP.getY(), Pmax.getX(), Pmax.getY(), this); // NE
+    children[2] = std::make_unique<QuadNode>(Pmin.getX(), Pmin.getY(), centerP.getX(), centerP.getY(), this); // SW
+    children[3] = std::make_unique<QuadNode>(centerP.getX(), Pmin.getY(), Pmax.getX(), centerP.getY(), this); // SE
 }
 
 void QuadNode::relocateParticle(const std::shared_ptr<Particle>& particle) {

@@ -3,7 +3,6 @@
 #include <random>
 #include <vector>
 #include "QuadTree.h"
-#include "QuadTree.h"
 size_t QuadTree::bucketSize = 6;
 
 std::vector<std::shared_ptr<Particle>> generateRandomParticles(int n, const Rect& boundary, NType maxVelocityMagnitude) {

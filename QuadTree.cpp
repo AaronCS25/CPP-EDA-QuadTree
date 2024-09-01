@@ -18,6 +18,7 @@ void QuadNode::subdivide() {
     children[1] = std::make_unique<QuadNode>(centerP.getX(), centerP.getY(), Pmax.getX(), Pmax.getY(), this); // NE
     children[2] = std::make_unique<QuadNode>(Pmin.getX(), Pmin.getY(), centerP.getX(), centerP.getY(), this); // SW
     children[3] = std::make_unique<QuadNode>(centerP.getX(), Pmin.getY(), Pmax.getX(), centerP.getY(), this); // SE
+    _isLeaf = false;
 }
 
 void QuadNode::relocateParticle(const std::shared_ptr<Particle>& particle) {

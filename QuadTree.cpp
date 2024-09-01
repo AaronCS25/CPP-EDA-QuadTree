@@ -34,8 +34,21 @@ void QuadNode::removeEmptyNode(QuadNode* emptyChild) {
 }
 
 bool QuadNode::insert(const std::shared_ptr<Particle>& particle) {
-    // TODO: Implement insert function
-    return false;
+    if (!boundary.contains(particle->getPosition())) { return false; }
+
+    if (_isLeaf && particles.size() < QuadTree::bucketSize)
+    {
+        addToBucket(particle);
+        return true;
+    }
+
+    if (_isLeaf) {
+        subdivide();
+        for (const auto& p: particles) { propagate(p); }
+        particles.clear();
+    }
+    
+    return propagate(particle);
 }
 
 void QuadNode::updateNode() {

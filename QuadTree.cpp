@@ -1,5 +1,5 @@
 #include "QuadTree.h"
-
+size_t Counter::superCounter = 0;
 // QuadNode
 void QuadNode::addToBucket(const std::shared_ptr<Particle>& particle) {
     particles.push_back(particle);
@@ -41,7 +41,7 @@ void QuadNode::relocateParticle(const std::shared_ptr<Particle>& particle) {
 void QuadNode::removeEmptyNode(QuadNode* emptyChild) {
     if (_isLeaf) { return; } // !No debería pasar
     
-    int numParticles = 0;
+    size_t numParticles = 0;
     int nonEmptyChildCount = 0;
     QuadNode* nonEmptyChild = nullptr;
 
@@ -96,8 +96,8 @@ void QuadNode::updateNode() {
         for (const auto& child: children)
         {
             child->updateNode();
-            removeEmptyNode(this);
         }
+        removeEmptyNode(this);
         return;
     }
 

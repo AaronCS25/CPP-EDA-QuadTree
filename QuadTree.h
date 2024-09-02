@@ -7,6 +7,11 @@
 #include <memory>
 #include <array>
 
+class Counter {
+public:
+    static size_t superCounter;
+};
+
 class QuadTree;
 
 class QuadNode {

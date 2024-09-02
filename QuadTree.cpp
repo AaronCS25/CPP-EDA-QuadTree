@@ -26,7 +26,16 @@ void QuadNode::subdivide() {
 }
 
 void QuadNode::relocateParticle(const std::shared_ptr<Particle>& particle) {
-    // TODO: Implement relocateParticle function
+    if (boundary.contains(particle->getPosition()) && _isLeaf) { return; }
+
+    if (boundary.contains(particle->getPosition()))
+    {
+        propagate(particle);
+        return;
+    }
+    
+    if (parent) { parent->relocateParticle(particle); }
+    return;
 }
 
 void QuadNode::removeEmptyNode(QuadNode* emptyChild) {

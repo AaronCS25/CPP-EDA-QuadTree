@@ -84,6 +84,8 @@ public:
     void updateTree() {
         root->updateNode();
     }
+
+    std::vector<std::shared_ptr<Particle>> knn(Point2D query, int k);
 };
 
 #endif // QUADTREE_H

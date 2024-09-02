@@ -129,3 +129,9 @@ void QuadNode::updateNode() {
 
     return;
 }
+
+std::vector<std::shared_ptr<Particle>> QuadTree::knn(Point2D query, int k)
+{
+    //TODO: Implement knn search
+    return std::vector<std::shared_ptr<Particle>>();
+}

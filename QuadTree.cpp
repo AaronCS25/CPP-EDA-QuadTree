@@ -61,5 +61,29 @@ bool QuadNode::insert(const std::shared_ptr<Particle>& particle) {
 }
 
 void QuadNode::updateNode() {
-    // TODO: Implement updateNode function
+    if (!_isLeaf) {
+        for (const auto& child: children)
+        {
+            child->updateNode();
+            removeEmptyNode(this);
+        }
+        return;
+    }
+
+    std::vector<std::shared_ptr<Particle>> particlesToRelocate;
+
+    for (auto it = particles.begin(); it != particles.end(); ) {
+        if (!boundary.contains((*it)->getPosition())) {
+            particlesToRelocate.push_back(*it);
+            it = particles.erase(it);
+        } else {
+            ++it;
+        }
+    }
+
+    for (const auto& p : particlesToRelocate) {
+        relocateParticle(p);
+    }
+
+    return;
 }

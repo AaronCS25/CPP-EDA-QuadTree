@@ -39,7 +39,38 @@ void QuadNode::relocateParticle(const std::shared_ptr<Particle>& particle) {
 }
 
 void QuadNode::removeEmptyNode(QuadNode* emptyChild) {
-    // TODO: Implement removeEmptyNode function
+    if (_isLeaf) { return; } // !No debería pasar
+    
+    int numParticles = 0;
+    int nonEmptyChildCount = 0;
+    QuadNode* nonEmptyChild = nullptr;
+
+    for (const auto& child: children)
+    {
+        if (child)
+        {
+            if (!child->_isLeaf || !child->particles.empty()) {
+                nonEmptyChildCount++;
+                numParticles += child->particles.size();
+                nonEmptyChild = child.get();
+            }
+        }
+    }
+
+    if (numParticles == 0 && nonEmptyChildCount == 0) {
+        for (auto& child : children) {
+            child.reset();
+        }
+        _isLeaf = true;
+    }
+    else if (nonEmptyChildCount == 1 && numParticles <= QuadTree::bucketSize) {
+        particles = std::move(nonEmptyChild->particles);
+        for (auto& child : children) {
+            child.reset();
+        }
+        _isLeaf = true;
+    }
+    return;
 }
 
 bool QuadNode::insert(const std::shared_ptr<Particle>& particle) {

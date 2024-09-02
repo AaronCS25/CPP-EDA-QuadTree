@@ -19,7 +19,7 @@ bool QuadNode::propagate(const std::shared_ptr<Particle>& particle) {
             }
         }
     }
-    
+
     return false;
 }
 
@@ -35,29 +35,29 @@ void QuadNode::subdivide() {
 }
 
 void QuadNode::relocateParticle(const std::shared_ptr<Particle>& particle) {
-    if (boundary.contains(particle->getPosition()) && _isLeaf) { return; }
-
-    if (boundary.contains(particle->getPosition()))
+    if (!boundary.contains(particle->getPosition()))
     {
-        propagate(particle);
+        if (parent) { parent->relocateParticle(particle); }
         return;
     }
-    
-    if (parent) { parent->relocateParticle(particle); }
+
+    propagate(particle);
     return;
 }
 
 void QuadNode::removeEmptyNode(QuadNode* emptyChild) {
-    if (_isLeaf) { return; } // !No debería pasar
-    
+    // Si el nodo es una hoja, no debería llamar a esta función
+    if (_isLeaf) { 
+        return; 
+    }
+
     size_t numParticles = 0;
     int nonEmptyChildCount = 0;
     QuadNode* nonEmptyChild = nullptr;
 
-    for (const auto& child: children)
-    {
-        if (child)
-        {
+    // Contar partículas y verificar los hijos no vacíos
+    for (const auto& child: children) {
+        if (child) {
             if (!child->_isLeaf || !child->particles.empty()) {
                 nonEmptyChildCount++;
                 numParticles += child->particles.size();
@@ -66,12 +66,14 @@ void QuadNode::removeEmptyNode(QuadNode* emptyChild) {
         }
     }
 
+    // Si no hay partículas y no hay hijos no vacíos, vaciar el nodo actual
     if (numParticles == 0 && nonEmptyChildCount == 0) {
         for (auto& child : children) {
             child.reset();
         }
         _isLeaf = true;
     }
+    // Consolidar si solo hay un hijo no vacío y el número total de partículas es menor o igual al tamaño del bucket
     else if (nonEmptyChildCount == 1 && numParticles <= QuadTree::bucketSize) {
         particles = std::move(nonEmptyChild->particles);
         for (auto& child : children) {
@@ -79,8 +81,8 @@ void QuadNode::removeEmptyNode(QuadNode* emptyChild) {
         }
         _isLeaf = true;
     }
-    return;
 }
+
 
 bool QuadNode::insert(const std::shared_ptr<Particle>& particle) {
     if (!boundary.contains(particle->getPosition())) { return false; }
@@ -93,7 +95,7 @@ bool QuadNode::insert(const std::shared_ptr<Particle>& particle) {
 
     if (_isLeaf) {
         subdivide();
-        for (const auto& p: particles) { propagate(p); }
+        for (const auto& p: particles) { relocateParticle(p); }
         particles.clear();
     }
     
@@ -106,7 +108,7 @@ void QuadNode::updateNode() {
         {
             child->updateNode();
         }
-        removeEmptyNode(this);
+        // removeEmptyNode(this);
         return;
     }
 

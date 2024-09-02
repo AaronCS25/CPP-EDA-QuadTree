@@ -2,6 +2,7 @@
 #include <set>
 #include <random>
 #include <vector>
+#include <algorithm>
 #include "QuadTree.h"
 size_t QuadTree::bucketSize = 6;
 
@@ -47,7 +48,6 @@ void traverseTree(QuadNode* node, std::set<std::shared_ptr<Particle>>& foundPart
 bool verifyAllDataIndexed(QuadNode* rootNode, const std::set<std::shared_ptr<Particle>>& insertedParticles) {
     std::set<std::shared_ptr<Particle>> foundParticles;
     traverseTree(rootNode, foundParticles);
-    std::cout << "foundparticles: " << foundParticles.size() << " insertedParticles:" << insertedParticles.size() << "\n";
     return foundParticles == insertedParticles;
 }
 
@@ -202,43 +202,43 @@ bool verifyParticlesInCorrectLeaf(QuadNode* rootNode) {
 
 
 // Test 8: Verify k-NN search
-// bool verifyKnnSearch(QuadTree& tree, const std::vector<std::shared_ptr<Particle>>& particles, const Rect& boundary) {
-//     std::random_device rd;
-//     std::mt19937 gen(rd());
-//     std::uniform_real_distribution<float> posDistX(boundary.getPmin().getX().getValue(), boundary.getPmax().getX().getValue());
-//     std::uniform_real_distribution<float> posDistY(boundary.getPmin().getY().getValue(), boundary.getPmax().getY().getValue());
-//     std::uniform_int_distribution<int> kDist(1, 10);
+bool verifyKnnSearch(QuadTree& tree, const std::vector<std::shared_ptr<Particle>>& particles, const Rect& boundary) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> posDistX(boundary.getPmin().getX().getValue(), boundary.getPmax().getX().getValue());
+    std::uniform_real_distribution<float> posDistY(boundary.getPmin().getY().getValue(), boundary.getPmax().getY().getValue());
+    std::uniform_int_distribution<int> kDist(1, 10);
 
-//     for (int i = 0; i < 10; ++i) {
-//         Point2D queryPoint(NType(posDistX(gen)), NType(posDistY(gen)));
-//         int k = kDist(gen);
+    for (int i = 0; i < 10; ++i) {
+        Point2D queryPoint(NType(posDistX(gen)), NType(posDistY(gen)));
+        int k = kDist(gen);
 
-//         auto knnResult = tree.knn(queryPoint, k);
-//         std::vector<std::shared_ptr<Particle>> bruteForceResult = particles;
+        auto knnResult = tree.knn(queryPoint, k);
+        std::vector<std::shared_ptr<Particle>> bruteForceResult = particles;
 
-//         std::partial_sort(
-//             bruteForceResult.begin(),
-//             bruteForceResult.begin() + k,
-//             bruteForceResult.end(),
-//             [&queryPoint](const std::shared_ptr<Particle>& a, const std::shared_ptr<Particle>& b) {
-//                 return queryPoint.distance(a->getPosition()) < queryPoint.distance(b->getPosition());
-//             }
-//         );
+        std::partial_sort(
+            bruteForceResult.begin(),
+            bruteForceResult.begin() + k,
+            bruteForceResult.end(),
+            [&queryPoint](const std::shared_ptr<Particle>& a, const std::shared_ptr<Particle>& b) {
+                return queryPoint.distance(a->getPosition()) < queryPoint.distance(b->getPosition());
+            }
+        );
 
-//         bruteForceResult.resize(k);
+        bruteForceResult.resize(k);
 
-//         // Comparar los resultados
-//         std::sort(knnResult.begin(), knnResult.end());
-//         std::sort(bruteForceResult.begin(), bruteForceResult.end());
+        // Comparar los resultados
+        std::sort(knnResult.begin(), knnResult.end());
+        std::sort(bruteForceResult.begin(), bruteForceResult.end());
 
-//         if (knnResult != bruteForceResult) {
-//             std::cout << "k-NN search failed for query point " << queryPoint << " and k = " << k << std::endl;
-//             return false;
-//         }
-//     }
+        if (knnResult != bruteForceResult) {
+            std::cout << "k-NN search failed for query point " << queryPoint << " and k = " << k << std::endl;
+            return false;
+        }
+    }
 
-//     return true;
-// }
+    return true;
+}
 
 // Run all tests
 bool runTesting(QuadTree& tree, const std::vector<std::shared_ptr<Particle>>& particles, const Rect& boundary) {
@@ -279,10 +279,10 @@ bool runTesting(QuadTree& tree, const std::vector<std::shared_ptr<Particle>>& pa
         allTestsPassed = false;
     }
 
-    // if (!verifyKnnSearch(tree, particles, boundary)) {
-    //     std::cout << "Test failed: k-NN search did not return the expected results." << std::endl;
-    //     allTestsPassed = false;
-    // }
+    if (!verifyKnnSearch(tree, particles, boundary)) {
+        std::cout << "Test failed: k-NN search did not return the expected results." << std::endl;
+        allTestsPassed = false;
+    }
 
     return allTestsPassed;
 }
@@ -317,8 +317,6 @@ int main() {
     } else {
         std::cout << "Some tests failed." << std::endl;
     }
-
-    std::cout << Counter::superCounter << std::endl;
-
+    
     return 0;
 }

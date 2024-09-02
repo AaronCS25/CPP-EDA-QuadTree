@@ -6,11 +6,20 @@ void QuadNode::addToBucket(const std::shared_ptr<Particle>& particle) {
 }
 
 bool QuadNode::propagate(const std::shared_ptr<Particle>& particle) {
-    for (const auto& child : children) {
-        if (child->getBoundary().contains(particle->getPosition())) {
-            return child->insert(particle);
+    if (_isLeaf && boundary.contains(particle->getPosition()))
+    {
+        return insert(particle); 
+    }
+
+    if (boundary.contains(particle->getPosition()))
+    {
+        for (const auto& child : children) {
+            if (child && child->getBoundary().contains(particle->getPosition())) {
+                return child->propagate(particle);
+            }
         }
     }
+    
     return false;
 }
 

@@ -34,6 +34,20 @@ public:
         return pmin.getX() <= pmax.getX() && pmin.getY() <= pmax.getY();
     }
 
+    NType distance(Point2D& point) const {
+        if (contains(point)) { return 0; }
+
+        NType distX = 0, distY = 0;
+
+        if (point.getX() < pmin.getX()) { distX = pmin.getX() - point.getX(); }
+        else if (point.getX() > pmax.getX()) { distX = point.getX() - pmax.getX(); }
+
+        if (point.getY() < pmin.getY()) { distY = pmin.getY() - point.getY(); }
+        else if (point.getY() > pmax.getY()) { distY = point.getY() - pmax.getY(); }
+
+        return sqrt(distX * distX + distY * distY);
+    }
+
     bool operator==(const Rect& rect) const {
         return pmin == rect.pmin && pmax == rect.pmax;
     }

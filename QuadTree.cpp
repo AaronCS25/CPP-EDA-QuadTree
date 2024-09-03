@@ -1,4 +1,7 @@
+#include <variant>
+#include <queue>
 #include "QuadTree.h"
+
 size_t Counter::superCounter = 0;
 // QuadNode
 void QuadNode::addToBucket(const std::shared_ptr<Particle>& particle) {
@@ -45,7 +48,7 @@ void QuadNode::relocateParticle(const std::shared_ptr<Particle>& particle) {
     return;
 }
 
-void QuadNode::removeEmptyNode(QuadNode* emptyChild) {
+void QuadNode::removeEmptyNode() {
     if (_isLeaf) { return; }
 
     size_t numParticles = 0;
@@ -108,7 +111,7 @@ void QuadNode::updateNode() {
         {
             child->updateNode();
         }
-        removeEmptyNode(this);
+        removeEmptyNode();
         return;
     }
 
@@ -130,8 +133,56 @@ void QuadNode::updateNode() {
     return;
 }
 
-std::vector<std::shared_ptr<Particle>> QuadTree::knn(Point2D query, int k)
-{
-    //TODO: Implement knn search
-    return std::vector<std::shared_ptr<Particle>>();
+struct KNNElement {
+    std::variant<QuadNode*, std::shared_ptr<Particle>> element;
+
+    KNNElement(QuadNode* node) : element(node) {}
+    KNNElement(std::shared_ptr<Particle> particle) : element(particle) {}
+    
+    bool isNode() const { return std::holds_alternative<QuadNode*>(element); }
+
+    NType distance(Point2D& query) const {
+        if (isNode()) { return std::get<QuadNode*>(element)->getBoundary().distance(query); }
+        else { return query.distance(std::get<std::shared_ptr<Particle>>(element)->getPosition()); }
+    }
+};
+
+struct CompareKNNElement {
+    Point2D query;
+    CompareKNNElement(Point2D query): query(query) {}
+
+    bool operator()(const KNNElement& element1, const KNNElement& element2){
+        return element1.distance(query) > element2.distance(query);
+    }
+};
+
+std::vector<std::shared_ptr<Particle>> QuadTree::knn(Point2D query, size_t k) {
+    std::vector<std::shared_ptr<Particle>> knnParticles;
+    auto comparator = CompareKNNElement(query);
+    std::priority_queue<KNNElement, std::vector<KNNElement>, CompareKNNElement> pq(comparator);
+
+    pq.push(KNNElement(root.get()));
+    
+    while (!pq.empty() && knnParticles.size() < k) {
+        KNNElement element = pq.top();
+        pq.pop();
+
+        if (element.isNode()) {
+            QuadNode* node = std::get<QuadNode*>(element.element);
+            if (node->isLeaf()) {
+                for (auto& particle : node->getParticles()) {
+                    pq.push(KNNElement(particle));
+                }
+            } else {
+                for (auto& child : node->getChildren()) {
+                    pq.push(KNNElement(child.get()));
+                }
+            }
+        } else {
+            std::shared_ptr<Particle> particle = std::get<std::shared_ptr<Particle>>(element.element);
+            knnParticles.push_back(particle);
+        }
+    }
+
+    return knnParticles;
 }

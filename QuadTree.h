@@ -27,7 +27,7 @@ private:
     void subdivide();
 
     void relocateParticle(const std::shared_ptr<Particle>& particle);
-    void removeEmptyNode(QuadNode* emptyChild);
+    void removeEmptyNode();
 
 public:
     QuadNode(NType xmin, NType ymin, NType xmax, NType ymax, QuadNode* parent = nullptr)
@@ -85,7 +85,7 @@ public:
         root->updateNode();
     }
 
-    std::vector<std::shared_ptr<Particle>> knn(Point2D query, int k);
+    std::vector<std::shared_ptr<Particle>> knn(Point2D query, size_t k);
 };
 
 #endif // QUADTREE_H
